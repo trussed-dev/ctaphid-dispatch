@@ -1,6 +1,4 @@
-use core::convert::TryFrom;
-
-#[derive(Copy,Clone,Debug,Eq,PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Command {
     // mandatory for CTAP1
     Ping,
@@ -52,7 +50,7 @@ impl TryFrom<u8> for Command {
 
 /// Vendor CTAPHID commands, from 0x40 to 0x7f.
 #[repr(u8)]
-#[derive(Copy,Clone,Debug,Eq,PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum VendorCommand {
     H40 = 0x40,
     H41 = 0x41,
@@ -125,7 +123,6 @@ impl VendorCommand {
     pub const LAST: u8 = 0x7f;
 }
 
-
 impl TryFrom<u8> for VendorCommand {
     type Error = ();
 
@@ -139,21 +136,21 @@ impl TryFrom<u8> for VendorCommand {
     }
 }
 
-impl Into<u8> for Command {
-    fn into(self) -> u8 {
-        match self {
-            Command::Ping => 0x01,
-            Command::Msg => 0x03,
-            Command::Init => 0x06,
-            Command::Error => 0x3f,
-            Command::Wink => 0x08,
-            Command::Lock => 0x04,
-            Command::Cbor => 0x10,
-            Command::Cancel => 0x11,
-            Command::Deselect => 0x12,
-            Command::KeepAlive => 0x3b,
-            Command::Vendor(command) => command as u8,
+impl From<Command> for u8 {
+    fn from(command: Command) -> u8 {
+        use Command::*;
+        match command {
+            Ping => 0x01,
+            Msg => 0x03,
+            Init => 0x06,
+            Error => 0x3f,
+            Wink => 0x08,
+            Lock => 0x04,
+            Cbor => 0x10,
+            Cancel => 0x11,
+            Deselect => 0x12,
+            KeepAlive => 0x3b,
+            Vendor(command) => command as u8,
         }
     }
 }
-

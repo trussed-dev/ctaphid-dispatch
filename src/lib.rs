@@ -14,6 +14,6 @@ extern crate delog;
 generate_macros!();
 
 pub mod app;
-pub mod types;
 pub mod command;
 pub mod dispatch;
+pub mod types;

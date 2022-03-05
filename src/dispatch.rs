@@ -1,30 +1,22 @@
-
-use interchange::{Interchange, Responder};
-use crate::types::{Command, Message, HidInterchange, Error};
 use crate::app::App;
+use crate::types::{Command, Error, HidInterchange, Message};
+use interchange::{Interchange, Responder};
 
 pub struct Dispatch {
     responder: Responder<HidInterchange>,
 }
 
-
 impl Dispatch {
-    pub fn new(
-        responder: Responder<HidInterchange>,
-    ) -> Dispatch {
-        Dispatch {
-            responder,
-        }
+    pub fn new(responder: Responder<HidInterchange>) -> Dispatch {
+        Dispatch { responder }
     }
 
     fn find_app<'a, 'b>(
         command: Command,
-        apps: &'a mut [&'b mut dyn App]
+        apps: &'a mut [&'b mut dyn App],
     ) -> Option<&'a mut &'b mut dyn App> {
-
-        apps.iter_mut().find(|app|
-            app.commands().contains(&command)
-        )
+        apps.iter_mut()
+            .find(|app| app.commands().contains(&command))
     }
 
     // // Using helper here to take potentially large stack burden off of call chain to application.
@@ -37,10 +29,8 @@ impl Dispatch {
 
     // Using helper here to take potentially large stack burden off of call chain to application.
     #[inline(never)]
-    fn reply_with_error(&mut self, error: Error){
-        self.responder.respond(
-            &Err(error)
-        ).expect("cant respond");
+    fn reply_with_error(&mut self, error: Error) {
+        self.responder.respond(&Err(error)).expect("cant respond");
     }
 
     #[inline(never)]
@@ -57,7 +47,7 @@ impl Dispatch {
         let response_buffer = &mut tuple.1;
         response_buffer.clear();
 
-        if let Err(error) = app.call(command, &request, response_buffer) {
+        if let Err(error) = app.call(command, request, response_buffer) {
             self.reply_with_error(error)
         } else {
             let response = Ok(response_buffer.clone());
@@ -66,18 +56,15 @@ impl Dispatch {
     }
 
     #[inline(never)]
-    pub fn poll<'a>(
-        &mut self,
-        apps: &mut [&'a mut dyn App],
-    ) -> bool {
+    pub fn poll<'a>(&mut self, apps: &mut [&'a mut dyn App]) -> bool {
         let maybe_request = self.responder.take_request();
         if let Some((command, message)) = maybe_request {
-            info_now!("cmd: {}", u8::from(command));
+            // info_now!("cmd: {}", u8::from(command));
+            // info_now!("cmd: {:?}", command);
 
             if let Some(app) = Self::find_app(command, apps) {
                 // match app.call(command, self.responder.response_mut().unwrap()) {
-                let request = message.clone();
-                self.call_app(*app, command, &request);
+                self.call_app(*app, command, &message);
             } else {
                 self.reply_with_error(Error::InvalidCommand);
             }
@@ -85,5 +72,4 @@ impl Dispatch {
 
         self.responder.state() == interchange::State::Responded
     }
-
 }

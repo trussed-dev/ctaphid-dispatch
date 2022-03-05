@@ -1,5 +1,4 @@
-
-#[derive(Copy,Clone,Debug,Eq,PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Error {
     NoResponse,
     InvalidCommand,
@@ -12,8 +11,11 @@ pub enum Error {
 // pub type U7609 = <U7168 as core::ops::Add<heapless::consts::U441>>::Output;
 // pub type U7609 = heapless::consts::U4096;
 
+// TODO: find reasonable size
+// pub type Message = heapless::Vec<u8, 3072>;
 pub type Message = heapless::Vec<u8, 7609>;
 pub type AppResult = core::result::Result<(), Error>;
+pub type ShortMessage = heapless::Vec<u8, 1024>;
 pub type InterchangeResponse = core::result::Result<Message, Error>;
 
 pub use crate::command::Command;
@@ -21,4 +23,3 @@ pub use crate::command::Command;
 interchange::interchange! {
     HidInterchange: ((Command, crate::types::Message), crate::types::InterchangeResponse)
 }
-
