@@ -43,7 +43,7 @@ impl Dispatch {
         //
         // Note that this only works since Request has the same type as
         // Response's Ok value.
-        let tuple: &mut (Command, Message) = unsafe { self.responder.interchange.rq_mut() };
+        let tuple: &mut (Command, Message) = unsafe { (&mut *self.responder.interchange.get()).rq_mut() };
         let response_buffer = &mut tuple.1;
         response_buffer.clear();
 
