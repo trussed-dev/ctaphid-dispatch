@@ -30,7 +30,29 @@ impl Dispatch {
     // Using helper here to take potentially large stack burden off of call chain to application.
     #[inline(never)]
     fn reply_with_error(&mut self, error: Error) {
-        self.responder.respond(&Err(error)).expect("cant respond");
+        self.reply_or_cancel(&Err(error))
+    }
+
+    fn reply_or_cancel(&mut self, response: &Result<crate::types::Message, Error>) {
+        if self.responder.respond(response).is_ok() {
+            return;
+        }
+
+        let state = self.responder.state();
+
+        match state {
+            interchange::State::Idle
+            | interchange::State::BuildingRequest
+            | interchange::State::BuildingResponse
+            | interchange::State::Requested
+            | interchange::State::Responded => panic!("Unexpected state: {state:?}"),
+            interchange::State::CancelingRequested
+            | interchange::State::CancelingBuildingResponse
+            | interchange::State::Canceled => self
+                .responder
+                .acknowledge_cancel()
+                .expect("failed to cancel"),
+        }
     }
 
     #[inline(never)]
@@ -43,20 +65,22 @@ impl Dispatch {
         //
         // Note that this only works since Request has the same type as
         // Response's Ok value.
-        let tuple: &mut (Command, Message) = unsafe { (&mut *self.responder.interchange.get()).rq_mut() };
+        let tuple: &mut (Command, Message) =
+            unsafe { (&mut *self.responder.interchange.get()).rq_mut() };
         let response_buffer = &mut tuple.1;
         response_buffer.clear();
 
         if let Err(error) = app.call(command, request, response_buffer) {
-            self.reply_with_error(error)
+            self.reply_with_error(error);
         } else {
             let response = Ok(response_buffer.clone());
-            self.responder.respond(&response).expect("responder failed");
+            self.reply_or_cancel(&response);
         }
     }
 
     #[inline(never)]
     pub fn poll<'a>(&mut self, apps: &mut [&'a mut dyn App]) -> bool {
+        info!("ctaphid sees state: {:?}", self.responder.state());
         let maybe_request = self.responder.take_request();
         if let Some((command, message)) = maybe_request {
             // info_now!("cmd: {}", u8::from(command));
@@ -68,8 +92,13 @@ impl Dispatch {
             } else {
                 self.reply_with_error(Error::InvalidCommand);
             }
+            self.responder.state() == interchange::State::Responded
+        } else {
+            match self.responder.state() {
+                interchange::State::Canceled => self.responder.acknowledge_cancel().is_ok(),
+                interchange::State::Responded => true,
+                _ => false,
+            }
         }
-
-        self.responder.state() == interchange::State::Responded
     }
 }
