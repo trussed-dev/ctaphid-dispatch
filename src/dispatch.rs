@@ -1,13 +1,12 @@
 use crate::app::App;
-use crate::types::{Command, Error, HidInterchange, Message};
-use interchange::{Interchange, Responder};
+use crate::types::{Command, Error, InterchangeResponse, Message, Responder};
 
 pub struct Dispatch {
-    responder: Responder<HidInterchange>,
+    responder: Responder<'static>,
 }
 
 impl Dispatch {
-    pub fn new(responder: Responder<HidInterchange>) -> Dispatch {
+    pub fn new(responder: Responder<'static>) -> Dispatch {
         Dispatch { responder }
     }
 
@@ -30,11 +29,20 @@ impl Dispatch {
     // Using helper here to take potentially large stack burden off of call chain to application.
     #[inline(never)]
     fn reply_with_error(&mut self, error: Error) {
-        self.reply_or_cancel(&Err(error))
+        self.reply_or_cancel(InterchangeResponse(Err(error)))
     }
 
-    fn reply_or_cancel(&mut self, response: &Result<crate::types::Message, Error>) {
+    fn reply_or_cancel(&mut self, response: InterchangeResponse) {
         if self.responder.respond(response).is_ok() {
+            return;
+        }
+
+        if self.responder.acknowledge_cancel().is_err() {
+            panic!("Unexpected state: {:?}", self.responder.state());
+        }
+    }
+    fn send_reply_or_cancel(&mut self) {
+        if self.responder.send_response().is_ok() {
             return;
         }
 
@@ -45,24 +53,12 @@ impl Dispatch {
 
     #[inline(never)]
     fn call_app(&mut self, app: &mut dyn App, command: Command, request: &Message) {
-        // now we do something that should be fixed conceptually later.
-        // We will no longer use the interchange data as request (just cloned it)
-        // We would like to pass the app a buffer to write data into - so we
-        // use the "big enough" request reference for this (it would make much more
-        // sense to use the response mut reference, but that's behind a Result).
-        //
-        // Note that this only works since Request has the same type as
-        // Response's Ok value.
-        let tuple: &mut (Command, Message) =
-            unsafe { (&mut *self.responder.interchange.get()).rq_mut() };
-        let response_buffer = &mut tuple.1;
-        response_buffer.clear();
+        let response_buffer = self.responder.response_mut().unwrap().0.as_mut().unwrap();
 
         if let Err(error) = app.call(command, request, response_buffer) {
             self.reply_with_error(error);
         } else {
-            let response = Ok(response_buffer.clone());
-            self.reply_or_cancel(&response);
+            self.send_reply_or_cancel()
         }
     }
 
