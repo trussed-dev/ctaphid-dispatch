@@ -16,10 +16,29 @@ pub enum Error {
 pub type Message = heapless::Vec<u8, 7609>;
 pub type AppResult = core::result::Result<(), Error>;
 pub type ShortMessage = heapless::Vec<u8, 1024>;
-pub type InterchangeResponse = core::result::Result<Message, Error>;
+
+/// Wrapper struct that implements [`Default`][] to be able to use [`response_mut`](interchange::Responder::response_mut)
+pub struct InterchangeResponse(pub Result<Message, Error>);
+
+impl Default for InterchangeResponse {
+    fn default() -> Self {
+        InterchangeResponse(Ok(Message::new()))
+    }
+}
+
+impl From<Result<Message, Error>> for InterchangeResponse {
+    fn from(value: Result<Message, Error>) -> Self {
+        Self(value)
+    }
+}
+
+impl From<InterchangeResponse> for Result<Message, Error> {
+    fn from(value: InterchangeResponse) -> Self {
+        value.0
+    }
+}
 
 pub use crate::command::Command;
 
-interchange::interchange! {
-    HidInterchange: ((Command, crate::types::Message), crate::types::InterchangeResponse)
-}
+pub type Responder<'pipe> = interchange::Responder<'pipe, (Command, Message), InterchangeResponse>;
+pub type Requester<'pipe> = interchange::Requester<'pipe, (Command, Message), InterchangeResponse>;
