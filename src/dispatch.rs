@@ -1,12 +1,12 @@
 use crate::app::App;
 use crate::types::{Command, Error, InterchangeResponse, Message, Responder};
 
-pub struct Dispatch {
-    responder: Responder<'static>,
+pub struct Dispatch<'pipe> {
+    responder: Responder<'pipe>,
 }
 
-impl Dispatch {
-    pub fn new(responder: Responder<'static>) -> Dispatch {
+impl<'pipe> Dispatch<'pipe> {
+    pub fn new(responder: Responder<'pipe>) -> Self {
         Dispatch { responder }
     }
 
