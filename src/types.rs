@@ -42,3 +42,4 @@ pub use crate::command::Command;
 
 pub type Responder<'pipe> = interchange::Responder<'pipe, (Command, Message), InterchangeResponse>;
 pub type Requester<'pipe> = interchange::Requester<'pipe, (Command, Message), InterchangeResponse>;
+pub type Channel = interchange::Channel<(Command, Message), InterchangeResponse>;
