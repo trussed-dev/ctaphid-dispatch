@@ -53,7 +53,13 @@ impl<'pipe> Dispatch<'pipe> {
 
     #[inline(never)]
     fn call_app(&mut self, app: &mut dyn App, command: Command, request: &Message) {
-        let response_buffer = self.responder.response_mut().unwrap().0.as_mut().unwrap();
+        let response_buffer = self
+            .responder
+            .response_mut()
+            .expect("App calls should only happen when a respose can be constructed")
+            .0
+            .as_mut()
+            .unwrap();
 
         if let Err(error) = app.call(command, request, response_buffer) {
             self.reply_with_error(error);
