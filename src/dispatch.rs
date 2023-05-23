@@ -1,19 +1,41 @@
+use core::sync::atomic::Ordering;
+
 use crate::app::App;
 use crate::types::{Command, Error, InterchangeResponse, Message, Responder};
 
-pub struct Dispatch<'pipe> {
+use trussed::interrupt::InterruptFlag;
+
+use ref_swap::OptionRefSwap;
+
+pub struct Dispatch<'pipe, 'interrupt> {
     responder: Responder<'pipe>,
+    interrupt: Option<&'interrupt OptionRefSwap<'interrupt, InterruptFlag>>,
 }
 
-impl<'pipe> Dispatch<'pipe> {
+impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
     pub fn new(responder: Responder<'pipe>) -> Self {
-        Dispatch { responder }
+        Dispatch {
+            responder,
+            interrupt: None,
+        }
+    }
+}
+
+impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
+    pub fn with_interrupt(
+        responder: Responder<'pipe>,
+        interrupt: Option<&'interrupt OptionRefSwap<'interrupt, InterruptFlag>>,
+    ) -> Self {
+        Dispatch {
+            responder,
+            interrupt,
+        }
     }
 
     fn find_app<'a, 'b>(
         command: Command,
-        apps: &'a mut [&'b mut dyn App],
-    ) -> Option<&'a mut &'b mut dyn App> {
+        apps: &'a mut [&'b mut dyn App<'interrupt>],
+    ) -> Option<&'a mut &'b mut dyn App<'interrupt>> {
         apps.iter_mut()
             .find(|app| app.commands().contains(&command))
     }
@@ -52,7 +74,7 @@ impl<'pipe> Dispatch<'pipe> {
     }
 
     #[inline(never)]
-    fn call_app(&mut self, app: &mut dyn App, command: Command, request: &Message) {
+    fn call_app(&mut self, app: &mut dyn App<'interrupt>, command: Command, request: &Message) {
         let response_buffer = self
             .responder
             .response_mut()
@@ -61,16 +83,29 @@ impl<'pipe> Dispatch<'pipe> {
             .as_mut()
             .unwrap();
 
-        if let Err(error) = app.call(command, request, response_buffer) {
-            self.reply_with_error(error);
+        // Cancellation is best-effort, and not relevant for actual synchronisation, so relaxed is used
+        let res =
+            if let (Some(app_interrupt), Some(interrupt_ptr)) = (app.interrupt(), self.interrupt) {
+                app_interrupt.set_working();
+                interrupt_ptr.store(Some(app_interrupt), Ordering::Relaxed);
+                let res = app.call(command, request, response_buffer);
+                app_interrupt.set_idle();
+                interrupt_ptr.store(None, Ordering::Relaxed);
+                res
+            } else {
+                app.call(command, request, response_buffer)
+            };
+
+        info_now!("Got res: {:?}", res);
+        if let Err(error) = res {
+            self.reply_with_error(error)
         } else {
             self.send_reply_or_cancel()
         }
     }
 
     #[inline(never)]
-    pub fn poll<'a>(&mut self, apps: &mut [&'a mut dyn App]) -> bool {
-        info!("ctaphid sees state: {:?}", self.responder.state());
+    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt>]) -> bool {
         let maybe_request = self.responder.take_request();
         if let Some((command, message)) = maybe_request {
             // info_now!("cmd: {}", u8::from(command));
