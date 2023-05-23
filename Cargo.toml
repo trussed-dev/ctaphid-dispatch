@@ -14,6 +14,8 @@ delog = "0.1"
 heapless = "0.7"
 heapless-bytes = "0.3"
 interchange = "0.3.0"
+ref-swap = "0.1.0"
+trussed = "0.1.0"
 
 [features]
 default = []
@@ -25,3 +27,7 @@ log-info = []
 log-debug = []
 log-warn = []
 log-error = []
+
+[patch.crates-io]
+ref-swap = { git = "https://github.com/nitrokey/ref-swap.git", rev = "de0330e85b479074ae03bcc05888cfeff682f61e" }
+trussed = { git = "https://github.com/sosthene-nitrokey/trussed.git", rev = "6f095e14b27bd58ab8fa56cf6c616266d92fbfb4" }

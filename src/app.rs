@@ -1,10 +1,17 @@
+use trussed::interrupt::InterruptFlag;
+
 pub use crate::command::Command;
 pub use crate::types::{AppResult, Error, Message};
 
 /// trait interface for a CTAPHID application.
 /// The application chooses which commands to register to, and will be called upon
 /// when the commands are received in the CTAPHID layer.  Only one application can be registered to a particular command.
-pub trait App {
+pub trait App<'interrupt> {
+    /// Get access to the app interrupter
+    fn interrupt(&self) -> Option<&'interrupt InterruptFlag> {
+        None
+    }
+
     /// Define which CTAPHID commands to register to.
     fn commands(&self) -> &'static [Command];
 
