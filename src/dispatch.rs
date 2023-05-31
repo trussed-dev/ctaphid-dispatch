@@ -40,18 +40,8 @@ impl Dispatch {
 
         let state = self.responder.state();
 
-        match state {
-            interchange::State::Idle
-            | interchange::State::BuildingRequest
-            | interchange::State::BuildingResponse
-            | interchange::State::Requested
-            | interchange::State::Responded => panic!("Unexpected state: {state:?}"),
-            interchange::State::CancelingRequested
-            | interchange::State::CancelingBuildingResponse
-            | interchange::State::Canceled => self
-                .responder
-                .acknowledge_cancel()
-                .expect("failed to cancel"),
+        if self.responder.acknowledge_cancel().is_err() {
+            panic!("Unexpected state: {?}", self.responder.state());
         }
     }
 
