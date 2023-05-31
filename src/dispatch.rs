@@ -38,10 +38,8 @@ impl Dispatch {
             return;
         }
 
-        let state = self.responder.state();
-
         if self.responder.acknowledge_cancel().is_err() {
-            panic!("Unexpected state: {?}", self.responder.state());
+            panic!("Unexpected state: {:?}", self.responder.state());
         }
     }
 
