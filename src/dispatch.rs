@@ -106,14 +106,17 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
 
     #[inline(never)]
     pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt>]) -> bool {
-        let maybe_request = self.responder.take_request();
-        if let Some((command, message)) = maybe_request {
+        // We could call take_request directly, but for some reason this doubles stack usage.
+        let mut message_buffer = Message::new();
+        if let Ok((command, message)) = self.responder.request() {
             // info_now!("cmd: {}", u8::from(command));
             // info_now!("cmd: {:?}", command);
 
-            if let Some(app) = Self::find_app(command, apps) {
+            message_buffer.extend_from_slice(message).unwrap();
+
+            if let Some(app) = Self::find_app(*command, apps) {
                 // match app.call(command, self.responder.response_mut().unwrap()) {
-                self.call_app(*app, command, &message);
+                self.call_app(*app, *command, &message_buffer);
             } else {
                 self.reply_with_error(Error::InvalidCommand);
             }
