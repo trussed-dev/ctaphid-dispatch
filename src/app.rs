@@ -1,4 +1,4 @@
-use trussed::interrupt::InterruptFlag;
+use trussed_core::InterruptFlag;
 
 pub use crate::command::Command;
 pub use crate::types::{AppResult, Error, Message};

@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Optimize stack usage of `Dispatch::poll`
+- Replace `trussed` dependency with `trussed-core`.
 
 ## [0.1.1] - 2022-08-22
 - adjust to `interchange` API change

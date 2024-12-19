@@ -3,7 +3,7 @@ use core::sync::atomic::Ordering;
 use crate::app::App;
 use crate::types::{Command, Error, InterchangeResponse, Message, Responder};
 
-use trussed::interrupt::InterruptFlag;
+use trussed_core::InterruptFlag;
 
 use ref_swap::OptionRefSwap;
 
