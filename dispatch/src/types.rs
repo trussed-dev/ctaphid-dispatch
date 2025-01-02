@@ -1,9 +1,4 @@
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    NoResponse,
-    InvalidCommand,
-    InvalidLength,
-}
+pub use ctaphid_app::{Error, Message};
 
 // // 7609 bytes is max message size for ctaphid
 // type U6144 = <heapless::consts::U4096 as core::ops::Add<heapless::consts::U2048>>::Output;
@@ -12,8 +7,6 @@ pub enum Error {
 // pub type U7609 = heapless::consts::U4096;
 
 // TODO: find reasonable size
-// pub type Message = heapless::Vec<u8, 3072>;
-pub type Message = heapless::Vec<u8, 7609>;
 pub type AppResult = core::result::Result<(), Error>;
 pub type ShortMessage = heapless::Vec<u8, 1024>;
 

@@ -1,11 +1,10 @@
 use core::sync::atomic::Ordering;
 
-use crate::app::App;
-use crate::types::{Command, Error, InterchangeResponse, Message, Responder};
+use crate::types::{InterchangeResponse, Message, Responder};
 
-use trussed::interrupt::InterruptFlag;
-
+use ctaphid_app::{App, Command, Error};
 use ref_swap::OptionRefSwap;
+use trussed::interrupt::InterruptFlag;
 
 pub struct Dispatch<'pipe, 'interrupt> {
     responder: Responder<'pipe>,
