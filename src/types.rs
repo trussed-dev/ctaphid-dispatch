@@ -13,7 +13,9 @@ pub enum Error {
 
 // TODO: find reasonable size
 // pub type Message = heapless::Vec<u8, 3072>;
-pub type Message = heapless::Vec<u8, 7609>;
+pub const MESSAGE_SIZE: usize = 7609;
+
+pub type Message = heapless::Vec<u8, MESSAGE_SIZE>;
 pub type AppResult = core::result::Result<(), Error>;
 pub type ShortMessage = heapless::Vec<u8, 1024>;
 
