@@ -12,7 +12,7 @@ pub struct Dispatch<'pipe, 'interrupt> {
     interrupt: Option<&'interrupt OptionRefSwap<'interrupt, InterruptFlag>>,
 }
 
-impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
+impl<'pipe> Dispatch<'pipe, '_> {
     pub fn new(responder: Responder<'pipe>) -> Self {
         Dispatch {
             responder,

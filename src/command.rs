@@ -127,11 +127,10 @@ impl TryFrom<u8> for VendorCommand {
     type Error = ();
 
     fn try_from(from: u8) -> core::result::Result<Self, ()> {
-        match from {
-            // code if code >= Self::FIRST && code <= Self::LAST => Ok(VendorCommand(code)),
-            code @ Self::FIRST..=Self::LAST => Ok(unsafe { core::mem::transmute(code) }),
-            // TODO: replace with Command::Unknown and infallible Try
-            _ => Err(()),
+        if (Self::FIRST..=Self::LAST).contains(&from) {
+            Ok(unsafe { core::mem::transmute::<u8, VendorCommand>(from) })
+        } else {
+            Err(())
         }
     }
 }
