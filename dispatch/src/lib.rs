@@ -13,7 +13,14 @@
 extern crate delog;
 generate_macros!();
 
-pub mod app;
-pub mod command;
 pub mod dispatch;
 pub mod types;
+
+pub mod app {
+    pub use crate::types::AppResult;
+    pub use ctaphid_app::{App, Command, Error, Message};
+}
+
+pub mod command {
+    pub use ctaphid_app::{Command, VendorCommand};
+}

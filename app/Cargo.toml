@@ -1,0 +1,13 @@
+[package]
+name = "ctaphid-app"
+version = "0.1.0"
+description = "trait for CTAPHID applications"
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+heapless.workspace = true
+trussed-core.workspace = true

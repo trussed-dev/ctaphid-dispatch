@@ -1,7 +1,12 @@
+#![no_std]
+
 use trussed_core::InterruptFlag;
 
-pub use crate::command::Command;
-pub use crate::types::{AppResult, Error, Message};
+mod command;
+
+pub use command::{Command, VendorCommand};
+
+pub type Message = heapless::Vec<u8, 7609>;
 
 /// trait interface for a CTAPHID application.
 /// The application chooses which commands to register to, and will be called upon
@@ -19,5 +24,17 @@ pub trait App<'interrupt> {
     /// Application must put response in @message, or decide to return an error.
     ///
     /// The response is pre-cleared.
-    fn call(&mut self, command: Command, request: &Message, response: &mut Message) -> AppResult;
+    fn call(
+        &mut self,
+        command: Command,
+        request: &Message,
+        response: &mut Message,
+    ) -> Result<(), Error>;
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum Error {
+    NoResponse,
+    InvalidCommand,
+    InvalidLength,
 }

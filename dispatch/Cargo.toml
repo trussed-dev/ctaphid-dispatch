@@ -1,0 +1,29 @@
+[package]
+name = "ctaphid-dispatch"
+version = "0.1.1"
+description = "Dispatch layer after usbd-ctaphid"
+
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ctaphid-app = "0.1"
+delog = "0.1"
+heapless.workspace = true
+heapless-bytes = "0.3"
+interchange = "0.3.0"
+ref-swap = "0.1.2"
+trussed-core.workspace = true
+
+[features]
+default = []
+std = ["delog/std"]
+
+log-all = []
+log-none = []
+log-info = []
+log-debug = []
+log-warn = []
+log-error = []
