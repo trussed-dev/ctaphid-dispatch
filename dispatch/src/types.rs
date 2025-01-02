@@ -1,4 +1,4 @@
-pub use ctaphid_app::{Error, Message};
+pub use ctaphid_app::Error;
 
 // // 7609 bytes is max message size for ctaphid
 // type U6144 = <heapless::consts::U4096 as core::ops::Add<heapless::consts::U2048>>::Output;
@@ -7,6 +7,10 @@ pub use ctaphid_app::{Error, Message};
 // pub type U7609 = heapless::consts::U4096;
 
 // TODO: find reasonable size
+// pub type Message = heapless::Vec<u8, 3072>;
+pub const MESSAGE_SIZE: usize = 7609;
+
+pub type Message = heapless::Vec<u8, MESSAGE_SIZE>;
 pub type AppResult = core::result::Result<(), Error>;
 pub type ShortMessage = heapless::Vec<u8, 1024>;
 

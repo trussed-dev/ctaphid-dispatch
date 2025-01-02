@@ -1,17 +1,16 @@
 #![no_std]
 
+use heapless::Vec;
 use trussed_core::InterruptFlag;
 
 mod command;
 
 pub use command::{Command, VendorCommand};
 
-pub type Message = heapless::Vec<u8, 7609>;
-
 /// trait interface for a CTAPHID application.
 /// The application chooses which commands to register to, and will be called upon
 /// when the commands are received in the CTAPHID layer.  Only one application can be registered to a particular command.
-pub trait App<'interrupt> {
+pub trait App<'interrupt, const N: usize> {
     /// Get access to the app interrupter
     fn interrupt(&self) -> Option<&'interrupt InterruptFlag> {
         None
@@ -27,8 +26,8 @@ pub trait App<'interrupt> {
     fn call(
         &mut self,
         command: Command,
-        request: &Message,
-        response: &mut Message,
+        request: &[u8],
+        response: &mut Vec<u8, N>,
     ) -> Result<(), Error>;
 }
 

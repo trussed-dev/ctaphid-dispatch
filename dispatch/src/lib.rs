@@ -18,7 +18,7 @@ pub mod types;
 
 pub mod app {
     pub use crate::types::AppResult;
-    pub use ctaphid_app::{App, Command, Error, Message};
+    pub use ctaphid_app::{App, Command, Error};
 }
 
 pub mod command {

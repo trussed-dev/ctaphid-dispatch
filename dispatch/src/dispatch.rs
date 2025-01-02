@@ -1,6 +1,6 @@
 use core::sync::atomic::Ordering;
 
-use crate::types::{InterchangeResponse, Message, Responder};
+use crate::types::{InterchangeResponse, Message, Responder, MESSAGE_SIZE};
 
 use ctaphid_app::{App, Command, Error};
 use ref_swap::OptionRefSwap;
@@ -33,8 +33,8 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
 
     fn find_app<'a, 'b>(
         command: Command,
-        apps: &'a mut [&'b mut dyn App<'interrupt>],
-    ) -> Option<&'a mut &'b mut dyn App<'interrupt>> {
+        apps: &'a mut [&'b mut dyn App<'interrupt, MESSAGE_SIZE>],
+    ) -> Option<&'a mut &'b mut dyn App<'interrupt, MESSAGE_SIZE>> {
         apps.iter_mut()
             .find(|app| app.commands().contains(&command))
     }
@@ -73,7 +73,12 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
     }
 
     #[inline(never)]
-    fn call_app(&mut self, app: &mut dyn App<'interrupt>, command: Command, request: &Message) {
+    fn call_app(
+        &mut self,
+        app: &mut dyn App<'interrupt, MESSAGE_SIZE>,
+        command: Command,
+        request: &Message,
+    ) {
         let response_buffer = self
             .responder
             .response_mut()
@@ -104,7 +109,7 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
     }
 
     #[inline(never)]
-    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt>]) -> bool {
+    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt, MESSAGE_SIZE>]) -> bool {
         // We could call take_request directly, but for some reason this doubles stack usage.
         let mut message_buffer = Message::new();
         if let Ok((command, message)) = self.responder.request() {
