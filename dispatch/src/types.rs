@@ -1,3 +1,5 @@
+use heapless_bytes::Bytes;
+
 pub use ctaphid_app::Error;
 
 // // 7609 bytes is max message size for ctaphid
@@ -10,9 +12,9 @@ pub use ctaphid_app::Error;
 // pub type Message = heapless::Vec<u8, 3072>;
 pub const MESSAGE_SIZE: usize = 7609;
 
-pub type Message = heapless::Vec<u8, MESSAGE_SIZE>;
+pub type Message = Bytes<MESSAGE_SIZE>;
 pub type AppResult = core::result::Result<(), Error>;
-pub type ShortMessage = heapless::Vec<u8, 1024>;
+pub type ShortMessage = Bytes<1024>;
 
 /// Wrapper struct that implements [`Default`][] to be able to use [`response_mut`](interchange::Responder::response_mut)
 pub struct InterchangeResponse(pub Result<Message, Error>);

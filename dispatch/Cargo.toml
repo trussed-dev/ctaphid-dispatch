@@ -11,8 +11,7 @@ repository.workspace = true
 [dependencies]
 ctaphid-app = "0.1"
 delog = "0.1"
-heapless.workspace = true
-heapless-bytes = "0.3"
+heapless-bytes.workspace = true
 interchange = "0.3.0"
 ref-swap = "0.1.2"
 trussed-core.workspace = true

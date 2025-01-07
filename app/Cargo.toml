@@ -9,5 +9,5 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-heapless.workspace = true
+heapless-bytes.workspace = true
 trussed-core.workspace = true

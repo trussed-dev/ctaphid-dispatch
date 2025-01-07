@@ -1,6 +1,6 @@
 #![no_std]
 
-use heapless::Vec;
+use heapless_bytes::Bytes;
 use trussed_core::InterruptFlag;
 
 mod command;
@@ -27,7 +27,7 @@ pub trait App<'interrupt, const N: usize> {
         &mut self,
         command: Command,
         request: &[u8],
-        response: &mut Vec<u8, N>,
+        response: &mut Bytes<N>,
     ) -> Result<(), Error>;
 }
 

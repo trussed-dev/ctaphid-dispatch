@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Optimize stack usage of `Dispatch::poll`
 - Replace `trussed` dependency with `trussed-core`.
+- Replace `heapless` dependency with `heapless-bytes`.
 - Move the `app` and `command` modules into a separate crate, `ctaphid-app`, and re-export it.
 - Make `App` trait generic over the response size.
 
