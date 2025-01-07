@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace `heapless` dependency with `heapless-bytes`.
 - Move the `app` and `command` modules into a separate crate, `ctaphid-app`, and re-export it.
 - Make `App` trait generic over the response size.
+- Remove unused `ShortMessage` type.
 
 ## [0.1.1] - 2022-08-22
 - adjust to `interchange` API change

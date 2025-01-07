@@ -14,7 +14,6 @@ pub const MESSAGE_SIZE: usize = 7609;
 
 pub type Message = Bytes<MESSAGE_SIZE>;
 pub type AppResult = core::result::Result<(), Error>;
-pub type ShortMessage = Bytes<1024>;
 
 /// Wrapper struct that implements [`Default`][] to be able to use [`response_mut`](interchange::Responder::response_mut)
 pub struct InterchangeResponse(pub Result<Message, Error>);
