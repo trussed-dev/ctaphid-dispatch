@@ -9,7 +9,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-ctaphid-app = "0.1.0-rc.1"
+ctaphid-app = "0.1"
 delog = "0.1"
 heapless-bytes.workspace = true
 interchange = "0.3.0"

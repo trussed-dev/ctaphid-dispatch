@@ -10,7 +10,7 @@ repository = "https://github.com/solokeys/ctaphid-dispatch"
 
 [workspace.dependencies]
 heapless-bytes = "0.3"
-trussed-core = "0.1.0-rc.1"
+trussed-core = "0.1.0"
 
 [patch.crates-io]
 ctaphid-app.path = "app"
