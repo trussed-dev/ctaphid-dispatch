@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Move the `app` and `command` modules into a separate crate, `ctaphid-app`, and re-export it.
 - Make `App` trait generic over the response size.
 - Remove unused `ShortMessage` type.
+- Flatten the public module structure and remove unnecessary re-exports.
 
 ## [0.1.1] - 2022-08-22
 - adjust to `interchange` API change
