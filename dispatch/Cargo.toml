@@ -19,9 +19,9 @@ trussed-core.workspace = true
 [features]
 default = []
 std = ["delog/std"]
-backend-dilithium2 = []
-backend-dilithium3 = []
-backend-dilithium5 = []
+mldsa44 = []
+mldsa65 = []
+mldsa87 = []
 
 
 log-all = []

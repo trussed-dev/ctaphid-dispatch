@@ -2,15 +2,15 @@ use ctaphid_app::{Command, Error};
 use heapless_bytes::Bytes;
 
 // TODO: update ML-DSA to minimum necessary sizes
-pub const MESSAGE_SIZE: usize = (if cfg!(feature = "backend-mldsa-87") {
+pub const MESSAGE_SIZE: usize = if cfg!(feature = "mldsa87") {
     20000
-} else if cfg!(feature = "backend-mldsa-65") {
+} else if cfg!(feature = "mldsa65") {
     15000
-} else if cfg!(feature = "backend-mldsa-55") {
+} else if cfg!(feature = "mldsa44") {
     10000
 } else {
     7609
-});
+};
 
 pub type Message = Bytes<MESSAGE_SIZE>;
 
