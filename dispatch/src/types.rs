@@ -1,31 +1,32 @@
 use ctaphid_app::{Command, Error};
 use heapless_bytes::Bytes;
 
-pub const MESSAGE_SIZE: usize = 7609;
-
-pub type Message = Bytes<MESSAGE_SIZE>;
+pub const DEFAULT_MESSAGE_SIZE: usize = 7609;
 
 /// Wrapper struct that implements [`Default`][] to be able to use [`response_mut`](interchange::Responder::response_mut)
-pub struct InterchangeResponse(pub Result<Message, Error>);
+pub struct InterchangeResponse<const N: usize>(pub Result<Bytes<N>, Error>);
 
-impl Default for InterchangeResponse {
+impl<const N: usize> Default for InterchangeResponse<N> {
     fn default() -> Self {
-        InterchangeResponse(Ok(Message::new()))
+        InterchangeResponse(Ok(Default::default()))
     }
 }
 
-impl From<Result<Message, Error>> for InterchangeResponse {
-    fn from(value: Result<Message, Error>) -> Self {
+impl<const N: usize> From<Result<Bytes<N>, Error>> for InterchangeResponse<N> {
+    fn from(value: Result<Bytes<N>, Error>) -> Self {
         Self(value)
     }
 }
 
-impl From<InterchangeResponse> for Result<Message, Error> {
-    fn from(value: InterchangeResponse) -> Self {
+impl<const N: usize> From<InterchangeResponse<N>> for Result<Bytes<N>, Error> {
+    fn from(value: InterchangeResponse<N>) -> Self {
         value.0
     }
 }
 
-pub type Responder<'pipe> = interchange::Responder<'pipe, (Command, Message), InterchangeResponse>;
-pub type Requester<'pipe> = interchange::Requester<'pipe, (Command, Message), InterchangeResponse>;
-pub type Channel = interchange::Channel<(Command, Message), InterchangeResponse>;
+pub type Responder<'pipe, const N: usize> =
+    interchange::Responder<'pipe, (Command, Bytes<N>), InterchangeResponse<N>>;
+pub type Requester<'pipe, const N: usize> =
+    interchange::Requester<'pipe, (Command, Bytes<N>), InterchangeResponse<N>>;
+pub type Channel<const N: usize> =
+    interchange::Channel<(Command, Bytes<N>), InterchangeResponse<N>>;

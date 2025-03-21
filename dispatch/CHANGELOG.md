@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
--
+
+- Make `Dispatch` generic over the buffer size, rename `MESSAGE_SIZE` to `DEFAULT_MESSAGE_SIZE`, remove the `Message` type and add a `DefaultDispatch` type alias for `Dispatch<_, _, DEFAULT_MESSAGE_SIZE>`.
 
 ## [0.2.0] - 2025-01-08
 

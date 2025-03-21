@@ -1,18 +1,19 @@
 use core::sync::atomic::Ordering;
 
-use crate::types::{InterchangeResponse, Message, Responder, MESSAGE_SIZE};
+use crate::types::{InterchangeResponse, Responder};
 
 use ctaphid_app::{App, Command, Error};
+use heapless_bytes::Bytes;
 use ref_swap::OptionRefSwap;
 use trussed_core::InterruptFlag;
 
-pub struct Dispatch<'pipe, 'interrupt> {
-    responder: Responder<'pipe>,
+pub struct Dispatch<'pipe, 'interrupt, const N: usize> {
+    responder: Responder<'pipe, N>,
     interrupt: Option<&'interrupt OptionRefSwap<'interrupt, InterruptFlag>>,
 }
 
-impl<'pipe> Dispatch<'pipe, '_> {
-    pub fn new(responder: Responder<'pipe>) -> Self {
+impl<'pipe, const N: usize> Dispatch<'pipe, '_, N> {
+    pub fn new(responder: Responder<'pipe, N>) -> Self {
         Dispatch {
             responder,
             interrupt: None,
@@ -20,9 +21,9 @@ impl<'pipe> Dispatch<'pipe, '_> {
     }
 }
 
-impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
+impl<'pipe, 'interrupt, const N: usize> Dispatch<'pipe, 'interrupt, N> {
     pub fn with_interrupt(
-        responder: Responder<'pipe>,
+        responder: Responder<'pipe, N>,
         interrupt: Option<&'interrupt OptionRefSwap<'interrupt, InterruptFlag>>,
     ) -> Self {
         Dispatch {
@@ -33,8 +34,8 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
 
     fn find_app<'a, 'b>(
         command: Command,
-        apps: &'a mut [&'b mut dyn App<'interrupt, MESSAGE_SIZE>],
-    ) -> Option<&'a mut &'b mut dyn App<'interrupt, MESSAGE_SIZE>> {
+        apps: &'a mut [&'b mut dyn App<'interrupt, N>],
+    ) -> Option<&'a mut &'b mut dyn App<'interrupt, N>> {
         apps.iter_mut()
             .find(|app| app.commands().contains(&command))
     }
@@ -53,7 +54,7 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
         self.reply_or_cancel(InterchangeResponse(Err(error)))
     }
 
-    fn reply_or_cancel(&mut self, response: InterchangeResponse) {
+    fn reply_or_cancel(&mut self, response: InterchangeResponse<N>) {
         if self.responder.respond(response).is_ok() {
             return;
         }
@@ -62,6 +63,7 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
             panic!("Unexpected state: {:?}", self.responder.state());
         }
     }
+
     fn send_reply_or_cancel(&mut self) {
         if self.responder.send_response().is_ok() {
             return;
@@ -73,12 +75,7 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
     }
 
     #[inline(never)]
-    fn call_app(
-        &mut self,
-        app: &mut dyn App<'interrupt, MESSAGE_SIZE>,
-        command: Command,
-        request: &Message,
-    ) {
+    fn call_app(&mut self, app: &mut dyn App<'interrupt, N>, command: Command, request: &Bytes<N>) {
         let response_buffer = self
             .responder
             .response_mut()
@@ -109,9 +106,9 @@ impl<'pipe, 'interrupt> Dispatch<'pipe, 'interrupt> {
     }
 
     #[inline(never)]
-    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt, MESSAGE_SIZE>]) -> bool {
+    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt, N>]) -> bool {
         // We could call take_request directly, but for some reason this doubles stack usage.
-        let mut message_buffer = Message::new();
+        let mut message_buffer = Bytes::new();
         if let Ok((command, message)) = self.responder.request() {
             // info_now!("cmd: {}", u8::from(command));
             // info_now!("cmd: {:?}", command);

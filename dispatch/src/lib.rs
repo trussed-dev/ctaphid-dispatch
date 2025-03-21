@@ -19,4 +19,6 @@ mod types;
 pub use ctaphid_app as app;
 
 pub use dispatch::Dispatch;
-pub use types::{Channel, InterchangeResponse, Message, Requester, Responder, MESSAGE_SIZE};
+pub use types::{Channel, InterchangeResponse, Requester, Responder, DEFAULT_MESSAGE_SIZE};
+
+pub type DefaultDispatch<'pipe, 'interrupt> = Dispatch<'pipe, 'interrupt, DEFAULT_MESSAGE_SIZE>;
