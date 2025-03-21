@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-
+
+## [0.3.0] - 2025-03-21
+
 - Make `Dispatch` generic over the buffer size, rename `MESSAGE_SIZE` to `DEFAULT_MESSAGE_SIZE`, remove the `Message` type and add a `DefaultDispatch` type alias for `Dispatch<_, _, DEFAULT_MESSAGE_SIZE>`.
 
 ## [0.2.0] - 2025-01-08
