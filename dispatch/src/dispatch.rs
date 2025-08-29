@@ -34,8 +34,8 @@ impl<'pipe, 'interrupt, const N: usize> Dispatch<'pipe, 'interrupt, N> {
 
     fn find_app<'a, 'b>(
         command: Command,
-        apps: &'a mut [&'b mut dyn App<'interrupt, N>],
-    ) -> Option<&'a mut &'b mut dyn App<'interrupt, N>> {
+        apps: &'a mut [&'b mut dyn App<'interrupt>],
+    ) -> Option<&'a mut &'b mut dyn App<'interrupt>> {
         apps.iter_mut()
             .find(|app| app.commands().contains(&command))
     }
@@ -75,7 +75,7 @@ impl<'pipe, 'interrupt, const N: usize> Dispatch<'pipe, 'interrupt, N> {
     }
 
     #[inline(never)]
-    fn call_app(&mut self, app: &mut dyn App<'interrupt, N>, command: Command, request: &Bytes<N>) {
+    fn call_app(&mut self, app: &mut dyn App<'interrupt>, command: Command, request: &[u8]) {
         let response_buffer = self
             .responder
             .response_mut()
@@ -106,18 +106,17 @@ impl<'pipe, 'interrupt, const N: usize> Dispatch<'pipe, 'interrupt, N> {
     }
 
     #[inline(never)]
-    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt, N>]) -> bool {
+    pub fn poll(&mut self, apps: &mut [&mut dyn App<'interrupt>]) -> bool {
         // We could call take_request directly, but for some reason this doubles stack usage.
-        let mut message_buffer = Bytes::new();
+        let mut buffer = Bytes::<N>::new();
         if let Ok((command, message)) = self.responder.request() {
             // info_now!("cmd: {}", u8::from(command));
             // info_now!("cmd: {:?}", command);
 
-            message_buffer.extend_from_slice(message).unwrap();
-
+            buffer.extend_from_slice(message).unwrap();
             if let Some(app) = Self::find_app(*command, apps) {
                 // match app.call(command, self.responder.response_mut().unwrap()) {
-                self.call_app(*app, *command, &message_buffer);
+                self.call_app(*app, *command, &buffer);
             } else {
                 self.reply_with_error(Error::InvalidCommand);
             }

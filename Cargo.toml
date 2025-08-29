@@ -9,8 +9,8 @@ license = "Apache-2.0 OR MIT"
 repository = "https://github.com/solokeys/ctaphid-dispatch"
 
 [workspace.dependencies]
-heapless-bytes = "0.3"
-trussed-core = "0.1.0"
+heapless-bytes = "0.5"
+trussed-core = "0.2"
 
 [patch.crates-io]
 ctaphid-app.path = "app"

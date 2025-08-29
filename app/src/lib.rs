@@ -1,6 +1,6 @@
 #![no_std]
 
-use heapless_bytes::Bytes;
+use heapless_bytes::BytesView;
 use trussed_core::InterruptFlag;
 
 mod command;
@@ -10,7 +10,7 @@ pub use command::{Command, VendorCommand};
 /// trait interface for a CTAPHID application.
 /// The application chooses which commands to register to, and will be called upon
 /// when the commands are received in the CTAPHID layer.  Only one application can be registered to a particular command.
-pub trait App<'interrupt, const N: usize> {
+pub trait App<'interrupt> {
     /// Get access to the app interrupter
     fn interrupt(&self) -> Option<&'interrupt InterruptFlag> {
         None
@@ -27,7 +27,7 @@ pub trait App<'interrupt, const N: usize> {
         &mut self,
         command: Command,
         request: &[u8],
-        response: &mut Bytes<N>,
+        response: &mut BytesView,
     ) -> Result<(), Error>;
 }
 
