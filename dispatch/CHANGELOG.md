@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-
+
+## [0.4.0] - 2026-03-23
+
 - Update to `heapless-bytes` v0.5 and `trussed-core` v0.2
+- Update to `ctaphid-app` v0.2
 
 ## [0.3.0] - 2025-03-21
 

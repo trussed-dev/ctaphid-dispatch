@@ -1,6 +1,6 @@
 [package]
 name = "ctaphid-dispatch"
-version = "0.3.0"
+version = "0.4.0"
 description = "Dispatch layer after usbd-ctaphid"
 
 authors.workspace = true
@@ -9,7 +9,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-ctaphid-app = "0.1"
+ctaphid-app = "0.2"
 delog = "0.1"
 heapless-bytes.workspace = true
 interchange = "0.3.0"
